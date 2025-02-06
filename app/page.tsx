@@ -10,9 +10,14 @@ export default function Home() {
   const { messages, input, handleInputChange, handleSubmit } = useChat()
   const [isTyping, setIsTyping] = useState(false)
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     setIsTyping(true)
-    handleSubmit(e).finally(() => setIsTyping(false))
+    try {
+      await handleSubmit(e)
+    } finally {
+      setIsTyping(false)
+    }
   }
 
   return (
