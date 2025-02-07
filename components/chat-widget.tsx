@@ -10,26 +10,22 @@ import { cn } from "@/lib/utils"
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [isTyping, setIsTyping] = React.useState(false)
-  const { messages, input, handleInputChange, handleSubmit } = useChat()
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: "/api/chat",
+  })
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
-  const scrollToBottom = () => {
+  const scrollToBottom = React.useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  }, [])
 
   React.useEffect(() => {
     scrollToBottom()
-  }, [messages, messagesEndRef]) // Added messagesEndRef to dependencies
+  }, [messages, scrollToBottom])
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsTyping(true)
-    try {
-      await handleSubmit(e)
-    } finally {
-      setIsTyping(false)
-    }
+    await handleSubmit(e)
   }
 
   return (
@@ -71,7 +67,7 @@ export function ChatWidget() {
               </div>
             </div>
           ))}
-          {isTyping && (
+          {isLoading && (
             <div className="flex justify-start">
               <div className="rounded-lg px-3 py-2 bg-muted">AI is typing...</div>
             </div>
@@ -86,7 +82,7 @@ export function ChatWidget() {
               placeholder="Type your message..."
               className="flex-grow"
             />
-            <Button type="submit" disabled={isTyping}>
+            <Button type="submit" disabled={isLoading}>
               Send
             </Button>
           </form>
